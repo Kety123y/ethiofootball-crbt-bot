@@ -504,7 +504,7 @@ async def unknown_command(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
-def main():
+async def main():
     db.init_db()
     logger.info("Database initialised.")
 
@@ -548,4 +548,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import asyncio
+    asyncio.run(main())
