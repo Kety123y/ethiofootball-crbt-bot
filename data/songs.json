@@ -1,0 +1,146 @@
+[
+  {
+    "team_name": "Manchester United",
+    "song_title": "Glory Glory Man United",
+    "crbt_code": "MU124",
+    "sms_command": "SUB MU124",
+    "preview_file": "previews/manu.mp3",
+    "category": "Anthem",
+    "league": "Premier League"
+  },
+  {
+    "team_name": "Arsenal",
+    "song_title": "North London Forever",
+    "crbt_code": "ARS333",
+    "sms_command": "SUB ARS333",
+    "preview_file": "previews/arsenal.mp3",
+    "category": "Anthem",
+    "league": "Premier League"
+  },
+  {
+    "team_name": "Chelsea",
+    "song_title": "Blue is the Colour",
+    "crbt_code": "CHE211",
+    "sms_command": "SUB CHE211",
+    "preview_file": "previews/chelsea.mp3",
+    "category": "Anthem",
+    "league": "Premier League"
+  },
+  {
+    "team_name": "Liverpool",
+    "song_title": "You'll Never Walk Alone",
+    "crbt_code": "LIV001",
+    "sms_command": "SUB LIV001",
+    "preview_file": "previews/liverpool.mp3",
+    "category": "Anthem",
+    "league": "Premier League"
+  },
+  {
+    "team_name": "Manchester City",
+    "song_title": "Blue Moon",
+    "crbt_code": "MCI002",
+    "sms_command": "SUB MCI002",
+    "preview_file": "previews/mancity.mp3",
+    "category": "Anthem",
+    "league": "Premier League"
+  },
+  {
+    "team_name": "Tottenham Hotspur",
+    "song_title": "Oh When the Spurs",
+    "crbt_code": "TOT003",
+    "sms_command": "SUB TOT003",
+    "preview_file": "previews/tottenham.mp3",
+    "category": "Anthem",
+    "league": "Premier League"
+  },
+  {
+    "team_name": "Real Madrid",
+    "song_title": "Hala Madrid Y Nada Más",
+    "crbt_code": "RMA100",
+    "sms_command": "SUB RMA100",
+    "preview_file": "previews/madrid.mp3",
+    "category": "Anthem",
+    "league": "La Liga"
+  },
+  {
+    "team_name": "FC Barcelona",
+    "song_title": "Cant del Barça",
+    "crbt_code": "BAR101",
+    "sms_command": "SUB BAR101",
+    "preview_file": "previews/barcelona.mp3",
+    "category": "Anthem",
+    "league": "La Liga"
+  },
+  {
+    "team_name": "Atletico Madrid",
+    "song_title": "Atleti Atleti",
+    "crbt_code": "ATM102",
+    "sms_command": "SUB ATM102",
+    "preview_file": "previews/atletico.mp3",
+    "category": "Anthem",
+    "league": "La Liga"
+  },
+  {
+    "team_name": "Bayern Munich",
+    "song_title": "Mia san Mia",
+    "crbt_code": "BAY200",
+    "sms_command": "SUB BAY200",
+    "preview_file": "previews/bayern.mp3",
+    "category": "Anthem",
+    "league": "Bundesliga"
+  },
+  {
+    "team_name": "Borussia Dortmund",
+    "song_title": "You'll Never Walk Alone BVB",
+    "crbt_code": "BVB201",
+    "sms_command": "SUB BVB201",
+    "preview_file": "previews/dortmund.mp3",
+    "category": "Anthem",
+    "league": "Bundesliga"
+  },
+  {
+    "team_name": "Juventus",
+    "song_title": "Storia di un Grande Amore",
+    "crbt_code": "JUV300",
+    "sms_command": "SUB JUV300",
+    "preview_file": "previews/juventus.mp3",
+    "category": "Anthem",
+    "league": "Serie A"
+  },
+  {
+    "team_name": "AC Milan",
+    "song_title": "Milan Milan",
+    "crbt_code": "ACM301",
+    "sms_command": "SUB ACM301",
+    "preview_file": "previews/acmilan.mp3",
+    "category": "Anthem",
+    "league": "Serie A"
+  },
+  {
+    "team_name": "Ethiopia National Team",
+    "song_title": "Walias Pride Anthem",
+    "crbt_code": "ETH500",
+    "sms_command": "SUB ETH500",
+    "preview_file": "previews/ethiopia.mp3",
+    "category": "National",
+    "league": "Ethiopian Premier League"
+  },
+  {
+    "team_name": "Saint George SC",
+    "song_title": "Kidist George March",
+    "crbt_code": "SGE501",
+    "sms_command": "SUB SGE501",
+    "preview_file": "previews/stgeorge.mp3",
+    "category": "Anthem",
+    "league": "Ethiopian Premier League"
+  },
+  {
+    "team_name": "Mekelakeya FC",
+    "song_title": "Mekelakeya Victory Song",
+    "crbt_code": "MEK502",
+    "sms_command": "SUB MEK502",
+    "preview_file": "previews/mekelakeya.mp3",
+    "category": "Anthem",
+    "league": "Ethiopian Premier League"
+  }
+]
