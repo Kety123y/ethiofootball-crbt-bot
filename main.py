@@ -7,6 +7,7 @@ via Ethio Telecom's 822 SMS service.
 import logging
 import os
 import time
+import asyncio
 from functools import wraps
 from urllib.parse import quote
 
@@ -36,7 +37,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ── Rate-limit store ──────────────────────────────────────────────────────────
-_last_seen: dict[int, float] = {}
+_last_seen: dict = {}
 
 # ── Admin conversation states ─────────────────────────────────────────────────
 (
@@ -48,12 +49,12 @@ _last_seen: dict[int, float] = {}
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 LEAGUE_EMOJI = {
-    "Premier League":         "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-    "La Liga":                "🇪🇸",
-    "Bundesliga":             "🇩🇪",
-    "Serie A":                "🇮🇹",
+    "Premier League":           "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    "La Liga":                  "🇪🇸",
+    "Bundesliga":               "🇩🇪",
+    "Serie A":                  "🇮🇹",
     "Ethiopian Premier League": "🇪🇹",
-    "Other":                  "🌍",
+    "Other":                    "🌍",
 }
 
 
@@ -99,7 +100,7 @@ def build_main_menu():
         InlineKeyboardButton("🔍 Search",          callback_data="search_hint"),
     ])
     buttons.append([
-        InlineKeyboardButton("ℹ️ How CRBT Works",  callback_data="howto"),
+        InlineKeyboardButton("ℹ️ How CRBT Works", callback_data="howto"),
     ])
     return InlineKeyboardMarkup(buttons)
 
@@ -131,10 +132,10 @@ def build_songs_menu(team: str, league: str):
 
 def build_song_detail_menu(song_id: int, league: str, team: str):
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("▶️ Play Preview",    callback_data=f"preview:{song_id}")],
-        [InlineKeyboardButton("🚀 Activate CRBT",   callback_data=f"activate:{song_id}")],
+        [InlineKeyboardButton("▶️ Play Preview",     callback_data=f"preview:{song_id}")],
+        [InlineKeyboardButton("🚀 Activate CRBT",    callback_data=f"activate:{song_id}")],
         [InlineKeyboardButton("📋 Copy SMS Command", callback_data=f"copy:{song_id}")],
-        [InlineKeyboardButton(f"🔙 Back to {team}", callback_data=f"team:{league}:{team}")],
+        [InlineKeyboardButton(f"🔙 Back to {team}",  callback_data=f"team:{league}:{team}")],
     ])
 
 
@@ -204,7 +205,9 @@ async def cmd_search(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     results = db.search_songs(query)
     if not results:
-        await update.message.reply_text(f"😕 No results found for <b>{query}</b>.", parse_mode="HTML")
+        await update.message.reply_text(
+            f"😕 No results found for <b>{query}</b>.", parse_mode="HTML"
+        )
         return
 
     buttons = [
@@ -230,7 +233,6 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     data = query.data
 
-    # ── Main menu ──────────────────────────────────────────────────────────
     if data == "main_menu":
         await query.edit_message_text(
             "🇪🇹⚽ <b>EthioFootball CRBT Bot</b>\n\nChoose a league:",
@@ -238,7 +240,6 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             reply_markup=build_main_menu(),
         )
 
-    # ── League ────────────────────────────────────────────────────────────
     elif data.startswith("league:"):
         league = data.split(":", 1)[1]
         emoji = LEAGUE_EMOJI.get(league, "⚽")
@@ -248,7 +249,6 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             reply_markup=build_teams_menu(league),
         )
 
-    # ── Team ──────────────────────────────────────────────────────────────
     elif data.startswith("team:"):
         _, league, team = data.split(":", 2)
         await query.edit_message_text(
@@ -257,7 +257,6 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             reply_markup=build_songs_menu(team, league),
         )
 
-    # ── Song detail ───────────────────────────────────────────────────────
     elif data.startswith("song:"):
         song_id = int(data.split(":")[1])
         song = db.get_song_by_id(song_id)
@@ -270,7 +269,6 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             reply_markup=build_song_detail_menu(song_id, song["league"], song["team_name"]),
         )
 
-    # ── Preview ───────────────────────────────────────────────────────────
     elif data.startswith("preview:"):
         song_id = int(data.split(":")[1])
         song = db.get_song_by_id(song_id)
@@ -285,16 +283,20 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
                 parse_mode="HTML",
             )
             return
-        await query.message.reply_text(f"▶️ Playing preview: <b>{song['song_title']}</b>", parse_mode="HTML")
+        await query.message.reply_text(
+            f"▶️ Playing preview: <b>{song['song_title']}</b>", parse_mode="HTML"
+        )
         with open(preview_path, "rb") as audio_file:
             await query.message.reply_audio(
                 audio=audio_file,
                 title=song["song_title"],
                 performer=song["team_name"],
-                caption=f"🎵 {song['song_title']} — {song['team_name']}\n🏷 Code: {song['crbt_code']}",
+                caption=(
+                    f"🎵 {song['song_title']} — {song['team_name']}\n"
+                    f"🏷 Code: {song['crbt_code']}"
+                ),
             )
 
-    # ── Activate ──────────────────────────────────────────────────────────
     elif data.startswith("activate:"):
         song_id = int(data.split(":")[1])
         song = db.get_song_by_id(song_id)
@@ -303,24 +305,23 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             return
         sms_body = quote(song["sms_command"])
         sms_link = f"sms:822?body={sms_body}"
-        first_time_link = f"sms:822?body=A"
-
+        first_time_link = "sms:822?body=A"
         text = (
             f"🚀 <b>Activate CRBT — {song['song_title']}</b>\n\n"
             f"<b>Step 1 (First time only):</b>\n"
-            f"Tap below to send <code>A</code> to 822 to enable CRBT service:\n"
+            f"Tap to send <code>A</code> to 822 to enable CRBT:\n"
             f"👉 <a href='{first_time_link}'>Open SMS: Send A to 822</a>\n\n"
             f"<b>Step 2 — Subscribe to this song:</b>\n"
-            f"Tap below to open your SMS app:\n"
             f"👉 <a href='{sms_link}'>Open SMS: {song['sms_command']} → 822</a>\n\n"
             f"<b>Or send manually:</b>\n"
             f"📱 To: <b>822</b>\n"
             f"✉️ Message: <code>{song['sms_command']}</code>\n\n"
             f"<i>Standard SMS rates apply. Ethio Telecom subscribers only.</i>"
         )
-        await query.message.reply_text(text, parse_mode="HTML", disable_web_page_preview=True)
+        await query.message.reply_text(
+            text, parse_mode="HTML", disable_web_page_preview=True
+        )
 
-    # ── Copy SMS command ──────────────────────────────────────────────────
     elif data.startswith("copy:"):
         song_id = int(data.split(":")[1])
         song = db.get_song_by_id(song_id)
@@ -334,7 +335,6 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             parse_mode="HTML",
         )
 
-    # ── Trending ──────────────────────────────────────────────────────────
     elif data == "trending":
         songs = db.get_trending_songs(6)
         buttons = [
@@ -351,13 +351,11 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup(buttons),
         )
 
-    # ── Search hint ───────────────────────────────────────────────────────
     elif data == "search_hint":
         await query.message.reply_text(
             "🔍 Use the /search command:\n\nExample: /search Arsenal"
         )
 
-    # ── How CRBT works ────────────────────────────────────────────────────
     elif data == "howto":
         text = (
             "ℹ️ <b>How CRBT Works on Ethio Telecom</b>\n\n"
@@ -376,7 +374,7 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text(text, parse_mode="HTML")
 
 
-# ── Admin: /addsong (ConversationHandler) ─────────────────────────────────────
+# ── Admin: /addsong ───────────────────────────────────────────────────────────
 
 @admin_only
 async def addsong_start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
@@ -478,7 +476,6 @@ async def cmd_listsongs(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         f"[<code>{s['crbt_code']}</code>] ({s['league']})"
         for s in songs
     ]
-    # Chunk into messages of ~4000 chars to stay under Telegram limit
     chunk, chunks = "", []
     for line in lines:
         if len(chunk) + len(line) > 3800:
@@ -504,13 +501,12 @@ async def unknown_command(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
-async def main():
+async def run_bot():
     db.init_db()
     logger.info("Database initialised.")
 
     app = Application.builder().token(BOT_TOKEN).build()
 
-    # /addsong conversation
     addsong_conv = ConversationHandler(
         entry_points=[CommandHandler("addsong", addsong_start)],
         states={
@@ -525,7 +521,6 @@ async def main():
         fallbacks=[CommandHandler("cancel", addsong_cancel)],
     )
 
-    # /removesong conversation
     removesong_conv = ConversationHandler(
         entry_points=[CommandHandler("removesong", removesong_start)],
         states={
@@ -544,9 +539,15 @@ async def main():
     app.add_handler(MessageHandler(filters.COMMAND, unknown_command))
 
     logger.info("🇪🇹⚽ EthioFootball CRBT Bot is running…")
-    app.run_polling(drop_pending_updates=True)
+
+    async with app:
+        await app.start()
+        await app.updater.start_polling(drop_pending_updates=True)
+        # Run forever until interrupted
+        await asyncio.Event().wait()
+        await app.updater.stop()
+        await app.stop()
 
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    asyncio.run(run_bot())
