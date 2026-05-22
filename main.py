@@ -15,6 +15,7 @@ from telegram import (
     Update,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    WebAppInfo,
 )
 from telegram.ext import (
     Application,
@@ -27,7 +28,7 @@ from telegram.ext import (
 )
 
 import db
-from config import BOT_TOKEN, ADMIN_IDS, RATE_LIMIT_SECONDS
+from config import BOT_TOKEN, ADMIN_IDS, RATE_LIMIT_SECONDS, WEBAPP_URL
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -132,10 +133,9 @@ def build_songs_menu(team: str, league: str):
 
 def build_song_detail_menu(song_id: int, league: str, team: str):
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("▶️ Play Preview",     callback_data=f"preview:{song_id}")],
-        [InlineKeyboardButton("🚀 Activate CRBT",    callback_data=f"activate:{song_id}")],
-        [InlineKeyboardButton("📋 Copy SMS Command", callback_data=f"copy:{song_id}")],
-        [InlineKeyboardButton(f"🔙 Back to {team}",  callback_data=f"team:{league}:{team}")],
+        [InlineKeyboardButton("▶️ Play Preview",                   callback_data=f"preview:{song_id}")],
+        [InlineKeyboardButton("📲 Set as My Ringtone (Activate)",  callback_data=f"activate:{song_id}")],
+        [InlineKeyboardButton(f"🔙 Back to {team}",                callback_data=f"team:{league}:{team}")],
     ])
 
 
@@ -303,42 +303,54 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         if not song:
             await query.message.reply_text("❌ Song not found.")
             return
-        sms_body = quote(song["sms_command"])
-        sms_link = f"sms:822?body={sms_body}"
-        first_time_link = "sms:822?body=A"
+
+        from urllib.parse import urlencode
+        params = urlencode({
+            "team":  song["team_name"],
+            "title": song["song_title"],
+            "code":  song["crbt_code"],
+            "sms":   song["sms_command"],
+        })
+        webapp_url = f"{WEBAPP_URL}?{params}"
+
         text = (
-            f"🚀 <b>Activate CRBT — {song['song_title']}</b>\n\n"
+            f"📲 <b>Set as My Ringtone</b>\n\n"
             f"⚽ <b>{song['team_name']}</b>\n"
+            f"🎵 {song['song_title']}\n"
             f"🏷 Code: <code>{song['crbt_code']}</code>\n\n"
-            f"━━━━━━━━━━━━━━━━━━\n"
-            f"<b>Step 1 — First time only:</b>\n"
-            f"Tap the button below to activate CRBT service.\n"
-            f"Your SMS app opens → just tap <b>Send</b>\n\n"
-            f"<b>Step 2 — Subscribe to this song:</b>\n"
-            f"Tap the second button below.\n"
-            f"Your SMS app opens → just tap <b>Send</b>\n"
-            f"━━━━━━━━━━━━━━━━━━\n\n"
-            f"<b>Or send manually:</b>\n"
-            f"📱 To: <b>822</b>\n"
-            f"✉️ Message: <code>{song['sms_command']}</code>\n\n"
-            f"<i>Ethio Telecom subscribers only.</i>"
+            f"Tap the button below. A page opens inside Telegram.\n"
+            f"Tap the <b>green button</b> on that page — your SMS app\n"
+            f"will open with everything pre-filled. Just tap <b>Send</b>. ✅"
         )
-        activate_buttons = InlineKeyboardMarkup([
-            [InlineKeyboardButton(
-                "1️⃣ First Time: Send A → 822 (tap then Send)",
-                url=first_time_link
-            )],
-            [InlineKeyboardButton(
-                f"2️⃣ Subscribe: {song['sms_command']} → 822 (tap then Send)",
-                url=sms_link
-            )],
-        ])
+
+        if WEBAPP_URL and WEBAPP_URL != "YOUR_WEBAPP_URL_HERE":
+            # Use Telegram Web App button (SMS links work inside browser)
+            activate_btn = InlineKeyboardMarkup([
+                [InlineKeyboardButton(
+                    "📲 Open Activation Page",
+                    web_app=WebAppInfo(url=webapp_url)
+                )],
+            ])
+        else:
+            # Fallback: show copyable SMS codes if webapp not configured
+            activate_btn = None
+
         await query.message.reply_text(
             text,
             parse_mode="HTML",
-            disable_web_page_preview=True,
-            reply_markup=activate_buttons,
+            reply_markup=activate_btn,
         )
+
+        if not WEBAPP_URL or WEBAPP_URL == "YOUR_WEBAPP_URL_HERE":
+            fallback = (
+                f"━━━━━━━━━━━━━━━━━━━━\n"
+                f"🔵 <b>STEP 1 — First Time Only</b>\n"
+                f"📱 To: <b>822</b>  ✉️ Message: <code>A</code>\n\n"
+                f"🟢 <b>STEP 2 — Subscribe</b>\n"
+                f"📱 To: <b>822</b>  ✉️ Message: <code>{song['sms_command']}</code>\n"
+                f"━━━━━━━━━━━━━━━━━━━━"
+            )
+            await query.message.reply_text(fallback, parse_mode="HTML")
 
     elif data.startswith("copy:"):
         song_id = int(data.split(":")[1])
