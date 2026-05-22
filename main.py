@@ -308,18 +308,36 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         first_time_link = "sms:822?body=A"
         text = (
             f"🚀 <b>Activate CRBT — {song['song_title']}</b>\n\n"
-            f"<b>Step 1 (First time only):</b>\n"
-            f"Tap to send <code>A</code> to 822 to enable CRBT:\n"
-            f"👉 <a href='{first_time_link}'>Open SMS: Send A to 822</a>\n\n"
+            f"⚽ <b>{song['team_name']}</b>\n"
+            f"🏷 Code: <code>{song['crbt_code']}</code>\n\n"
+            f"━━━━━━━━━━━━━━━━━━\n"
+            f"<b>Step 1 — First time only:</b>\n"
+            f"Tap the button below to activate CRBT service.\n"
+            f"Your SMS app opens → just tap <b>Send</b>\n\n"
             f"<b>Step 2 — Subscribe to this song:</b>\n"
-            f"👉 <a href='{sms_link}'>Open SMS: {song['sms_command']} → 822</a>\n\n"
+            f"Tap the second button below.\n"
+            f"Your SMS app opens → just tap <b>Send</b>\n"
+            f"━━━━━━━━━━━━━━━━━━\n\n"
             f"<b>Or send manually:</b>\n"
             f"📱 To: <b>822</b>\n"
             f"✉️ Message: <code>{song['sms_command']}</code>\n\n"
-            f"<i>Standard SMS rates apply. Ethio Telecom subscribers only.</i>"
+            f"<i>Ethio Telecom subscribers only.</i>"
         )
+        activate_buttons = InlineKeyboardMarkup([
+            [InlineKeyboardButton(
+                "1️⃣ First Time: Send A → 822 (tap then Send)",
+                url=first_time_link
+            )],
+            [InlineKeyboardButton(
+                f"2️⃣ Subscribe: {song['sms_command']} → 822 (tap then Send)",
+                url=sms_link
+            )],
+        ])
         await query.message.reply_text(
-            text, parse_mode="HTML", disable_web_page_preview=True
+            text,
+            parse_mode="HTML",
+            disable_web_page_preview=True,
+            reply_markup=activate_buttons,
         )
 
     elif data.startswith("copy:"):
