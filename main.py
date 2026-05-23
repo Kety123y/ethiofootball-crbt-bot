@@ -311,28 +311,24 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             "code":  song["crbt_code"],
             "sms":   song["sms_command"],
         })
-        webapp_url = f"{WEBAPP_URL}?{params}"
 
         text = (
             f"📲 <b>Set as My Ringtone</b>\n\n"
             f"⚽ <b>{song['team_name']}</b>\n"
-            f"🎵 {song['song_title']}\n"
+            f"🎵 <b>{song['song_title']}</b>\n"
             f"🏷 Code: <code>{song['crbt_code']}</code>\n\n"
-            f"Tap the button below. A page opens inside Telegram.\n"
-            f"Tap the <b>green button</b> on that page — your SMS app\n"
-            f"will open with everything pre-filled. Just tap <b>Send</b>. ✅"
+            f"Tap the button below to activate.\n"
+            f"The page opens in your browser — tap the button\n"
+            f"and your SMS app opens with everything pre-filled.\n"
+            f"Just tap <b>Send</b> ✅"
         )
 
-        if WEBAPP_URL and WEBAPP_URL != "YOUR_WEBAPP_URL_HERE":
-            # Use Telegram Web App button (SMS links work inside browser)
+        if WEBAPP_URL and WEBAPP_URL not in ("YOUR_WEBAPP_URL_HERE", ""):
+            webapp_url = f"{WEBAPP_URL}?{params}"
             activate_btn = InlineKeyboardMarkup([
-                [InlineKeyboardButton(
-                    "📲 Open Activation Page",
-                    web_app=WebAppInfo(url=webapp_url)
-                )],
+                [InlineKeyboardButton("📲 Activate CRBT — Open Page", url=webapp_url)],
             ])
         else:
-            # Fallback: show copyable SMS codes if webapp not configured
             activate_btn = None
 
         await query.message.reply_text(
@@ -341,7 +337,7 @@ async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             reply_markup=activate_btn,
         )
 
-        if not WEBAPP_URL or WEBAPP_URL == "YOUR_WEBAPP_URL_HERE":
+        if not activate_btn:
             fallback = (
                 f"━━━━━━━━━━━━━━━━━━━━\n"
                 f"🔵 <b>STEP 1 — First Time Only</b>\n"
