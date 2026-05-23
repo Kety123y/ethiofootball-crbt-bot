@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EthioFootball CRBT Activate</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f1a;color:#f0f0f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 60px}
+
+    .logo{font-size:22px;font-weight:800;color:#f5c518;text-align:center;margin-bottom:4px}
+    .logo-sub{font-size:13px;color:#9ca3af;text-align:center;margin-bottom:24px}
+
+    /* SONG CARD */
+    .song-card{background:#1f2937;border-radius:16px;padding:18px 20px;width:100%;max-width:420px;text-align:center;margin-bottom:24px;border:1px solid #374151}
+    .song-team{font-size:17px;font-weight:800;color:#f5c518}
+    .song-title{font-size:14px;color:#d1d5db;margin:5px 0}
+    .song-code{display:inline-block;background:#0a1628;color:#60a5fa;font-family:monospace;font-size:17px;font-weight:700;padding:6px 20px;border-radius:10px;margin-top:6px;letter-spacing:1px}
+
+    /* QUESTION SCREEN */
+    .question-box{width:100%;max-width:420px;text-align:center}
+    .question-box h2{font-size:18px;font-weight:700;color:#fff;margin-bottom:8px}
+    .question-box p{font-size:13px;color:#9ca3af;margin-bottom:28px;line-height:1.6}
+
+    .choice-btn{width:100%;padding:16px;border-radius:14px;border:none;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:10px}
+    .choice-btn:active{opacity:0.85}
+    .btn-new{background:#1d4ed8;color:#fff}
+    .btn-existing{background:#16a34a;color:#fff}
+
+    /* STEP SCREENS */
+    .step-box{width:100%;max-width:420px;background:#1f2937;border-radius:16px;padding:20px;margin-bottom:14px}
+    .step-box.s1{border-left:5px solid #f59e0b}
+    .step-box.s2{border-left:5px solid #16a34a}
+    .step-num{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px}
+    .s1 .step-num{color:#f59e0b}
+    .s2 .step-num{color:#4ade80}
+    .step-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:14px}
+
+    .sms-preview{background:#111827;border-radius:12px;padding:14px 16px;margin-bottom:14px}
+    .sms-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1f2937}
+    .sms-row:last-child{border-bottom:none}
+    .sms-lbl{font-size:12px;color:#6b7280}
+    .sms-val{font-size:16px;font-weight:700;font-family:monospace;color:#fff}
+
+    .sms-open-btn{display:block;width:100%;padding:15px;border-radius:13px;border:none;font-size:16px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;color:#111;background:#f5c518;margin-bottom:10px}
+    .sms-open-btn.green{background:#16a34a;color:#fff}
+    .sms-open-btn:active{opacity:0.85}
+
+    .next-btn{width:100%;padding:15px;border-radius:13px;border:2px solid #374151;background:transparent;color:#9ca3af;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;display:none}
+    .next-btn.show{display:block}
+    .next-btn:active{background:#1f2937}
+
+    .success-banner{width:100%;max-width:420px;background:#052e16;border:1px solid #16a34a;border-radius:14px;padding:16px;text-align:center;display:none}
+    .success-banner.show{display:block}
+    .success-banner h3{color:#4ade80;font-size:16px;margin-bottom:6px}
+    .success-banner p{color:#86efac;font-size:13px;line-height:1.6}
+
+    .note{width:100%;max-width:420px;font-size:12px;color:#4b5563;text-align:center;margin-top:16px;line-height:1.6}
+
+    /* SCREENS */
+    .screen{width:100%;display:flex;flex-direction:column;align-items:center}
+    .screen{display:none}
+    .screen.active{display:flex}
+  </style>
+</head>
+<body>
+
+<div class="logo">🇪🇹⚽ EthioFootball CRBT</div>
+<div class="logo-sub">Ethio Telecom Caller Ringtone</div>
+
+<!-- Song card shown on all screens -->
+<div class="song-card">
+  <div class="song-team" id="songTeam">Loading...</div>
+  <div class="song-title" id="songTitle"></div>
+  <div class="song-code"  id="songCode"></div>
+</div>
+
+<!-- ═══════════════════════════════
+     SCREEN A: QUESTION
+═══════════════════════════════ -->
+<div class="screen active" id="screen-question">
+  <div class="question-box">
+    <h2>Have you activated CRBT before?</h2>
+    <p>CRBT (Caller Ring Back Tone) is a service on Ethio Telecom that plays music when someone calls you.<br><br>If this is your first time, you need to activate it first.</p>
+
+    <button class="choice-btn btn-new" onclick="showScreen('screen-step1')">
+      🆕 No — First Time, Activate Now
+    </button>
+    <button class="choice-btn btn-existing" onclick="showScreen('screen-step2')">
+      ✅ Yes — Already Activated, Set Song
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     SCREEN B: STEP 1 (First time)
+═══════════════════════════════ -->
+<div class="screen" id="screen-step1">
+
+  <div class="step-box s1" style="width:100%;max-width:420px">
+    <div class="step-num">🔵 Step 1 of 2 — Activate CRBT Service</div>
+    <div class="step-title">Send "A" to 822 to enable CRBT on your number</div>
+
+    <div class="sms-preview">
+      <div class="sms-row">
+        <span class="sms-lbl">To (Recipient)</span>
+        <span class="sms-val">822</span>
+      </div>
+      <div class="sms-row">
+        <span class="sms-lbl">Message</span>
+        <span class="sms-val">A</span>
+      </div>
+    </div>
+
+    <a id="smsStep1Btn" href="sms:822?body=A" class="sms-open-btn">
+      📱 Tap to Open SMS App &amp; Send
+    </a>
+
+    <button class="next-btn show" id="doneStep1Btn" onclick="doneStep1()">
+      ✅ Done, I sent "A" — Now set my ringtone →
+    </button>
+  </div>
+
+  <div class="note">
+    Tap the yellow button above.<br>
+    Your SMS app opens with <strong style="color:#fff">822</strong> and <strong style="color:#fff">A</strong> already filled.<br>
+    Just tap <strong style="color:#fff">Send</strong> then come back here.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     SCREEN C: STEP 2 (Set ringtone)
+═══════════════════════════════ -->
+<div class="screen" id="screen-step2">
+
+  <div class="step-box s2" style="width:100%;max-width:420px">
+    <div class="step-num" id="step2Label">🟢 Step 2 of 2 — Set Your Ringtone</div>
+    <div class="step-title" id="step2Title">Send the code below to 822 to set this song as your ringtone</div>
+
+    <div class="sms-preview">
+      <div class="sms-row">
+        <span class="sms-lbl">To (Recipient)</span>
+        <span class="sms-val">822</span>
+      </div>
+      <div class="sms-row">
+        <span class="sms-lbl">Message</span>
+        <span class="sms-val" id="smsCodeDisplay">SUB ...</span>
+      </div>
+    </div>
+
+    <a id="smsStep2Btn" href="#" class="sms-open-btn green">
+      🎵 Tap to Open SMS App &amp; Set Ringtone
+    </a>
+  </div>
+
+  <div class="success-banner show" id="successBanner">
+    <h3>🎉 After tapping Send:</h3>
+    <p>
+      Ethio Telecom will send you a <strong>confirmation SMS</strong>.<br><br>
+      From that moment, anyone who calls you will hear<br>
+      <strong id="successSong" style="color:#4ade80"></strong><br>
+      instead of a normal ring! 📞🎶
+    </p>
+  </div>
+
+  <div class="note">
+    Tap the green button above.<br>
+    Your SMS app opens with <strong style="color:#fff">822</strong> and the code already filled.<br>
+    Just tap <strong style="color:#fff">Send</strong>.
+  </div>
+</div>
+
+<script>
+  // ── Read URL params ──────────────────────────────
+  const params   = new URLSearchParams(window.location.search);
+  const team     = params.get('team')  || 'Unknown Team';
+  const title    = params.get('title') || 'Unknown Song';
+  const code     = params.get('code')  || '';
+  const smsCmd   = params.get('sms')   || ('SUB ' + code);
+
+  // ── Fill song card (all screens) ─────────────────
+  document.getElementById('songTeam').textContent  = '⚽ ' + team;
+  document.getElementById('songTitle').textContent = '🎵 ' + title;
+  document.getElementById('songCode').textContent  = code;
+
+  // ── Fill Step 2 SMS details ───────────────────────
+  document.getElementById('smsCodeDisplay').textContent = smsCmd;
+  document.getElementById('smsStep2Btn').href = 'sms:822?body=' + encodeURIComponent(smsCmd);
+  document.getElementById('successSong').textContent = title;
+
+  // ── Step 2 label when coming from Step 1 ─────────
+  function doneStep1() {
+    document.getElementById('step2Label').textContent  = '🟢 Step 2 of 2 — Set Your Ringtone';
+    document.getElementById('step2Title').textContent  = 'Great! Now send the code to 822 to set this song as your ringtone';
+    showScreen('screen-step2');
+  }
+
+  // ── When coming directly (already activated) ──────
+  // step2 label stays as "Set Song"
+
+  // ── Screen switcher ───────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+</script>
+
+</body>
+</html>
